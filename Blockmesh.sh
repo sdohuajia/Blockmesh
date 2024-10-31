@@ -132,7 +132,7 @@ function deploy_node() {
 
     # 创建 Docker 容器并运行 blockmesh-cli
     echo "正在启动 Docker 容器并运行 blockmesh-cli..."
-    if ! docker run --name blockmesh-container --rm -e BLOCKMESH_EMAIL="$BLOCKMESH_EMAIL" -e BLOCKMESH_PASSWORD="$BLOCKMESH_PASSWORD" -v "$BLOCKMESH_DIR":/data ubuntu:22.04 /bin/bash -c "cd /data && chmod +x ./blockmesh-cli && ./blockmesh-cli"; then
+    if ! docker run --name blockmesh-container --rm -e BLOCKMESH_EMAIL="$BLOCKMESH_EMAIL" -e BLOCKMESH_PASSWORD="$BLOCKMESH_PASSWORD" -v "$BLOCKMESH_DIR":/data ubuntu:22.04 /bin/bash -c "./blockmesh-cli"; then
         echo "无法启动 blockmesh-cli，请检查镜像和命令。"
     fi
     
