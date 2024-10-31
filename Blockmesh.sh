@@ -90,14 +90,24 @@ function deploy_node() {
     export BLOCKMESH_EMAIL
     export BLOCKMESH_PASSWORD
 
+    # 检查 blockmesh-cli 是否存在并具有可执行权限
+    if [ ! -f "$BLOCKMESH_CLI_PATH" ]; then
+        echo "错误：找不到 blockmesh-cli 文件，请检查下载和解压是否成功。"
+        exit 1
+    fi
+
+    chmod +x "$BLOCKMESH_CLI_PATH"  # 确保文件可执行
+
     # 切换目录并执行脚本
     echo "切换目录并执行 ./blockmesh-cli..."
     cd /root/blockmesh/target/release
-    
+
     # 进入指定目录并运行 blockmesh-cli
     echo "正在启动 blockmesh-cli..."
-    ./blockmesh-cli > "$LOGFILE" 2>&1 &
+    ./blockmesh-cli > "$LOG_FILE" 2>&1 &  # 确保使用正确的日志文件变量
     echo "脚本执行完成。"
+
+    # 处理用户输入，确保没有错误
     read -p "按任意键返回主菜单..."
 }
 
