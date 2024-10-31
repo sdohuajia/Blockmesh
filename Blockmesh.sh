@@ -55,6 +55,7 @@ function deploy_node() {
 
     # 创建 blockmesh 目录
     BLOCKMESH_DIR="$HOME/blockmesh"
+    LOG_FILE="$BLOCKMESH_DIR/blockmesh.log"
 
     # 检查 blockmesh 目录是否存在
     if [ -d "$BLOCKMESH_DIR" ]; then
