@@ -20,7 +20,8 @@ function main_menu() {
         echo "退出脚本，请按键盘 ctrl + C 退出即可"
         echo "请选择要执行的操作:"
         echo "1. 部署节点"
-        echo "2. 退出"
+        echo "2. 查看日志"
+        echo "3. 退出"
 
         read -p "请输入选项 (1-2): " option
 
@@ -29,6 +30,9 @@ function main_menu() {
                 deploy_node
                 ;;
             2)
+                view_logs
+                ;;
+            3)
                 echo "退出脚本。"
                 exit 0
                 ;;
@@ -131,6 +135,17 @@ function deploy_node() {
     docker run --rm -e BLOCKMESH_EMAIL="$BLOCKMESH_EMAIL" -e BLOCKMESH_PASSWORD="$BLOCKMESH_PASSWORD" -v "$BLOCKMESH_DIR":/data block-mesh/blockmesh-cli:latest
 
     echo "脚本执行完成。"
+    read -p "按任意键返回主菜单..."
+}
+
+# 查看 Docker 日志
+function view_logs() {
+    echo "正在查看 Docker 容器日志..."
+    if [ "$(docker ps -q -f name=blockmesh-container)" ]; then
+        docker logs blockmesh-container
+    else
+        echo "没有找到名为 blockmesh-container 的运行容器。"
+    fi
     read -p "按任意键返回主菜单..."
 }
 
