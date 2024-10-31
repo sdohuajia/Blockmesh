@@ -2,6 +2,10 @@
 
 # 脚本保存路径
 SCRIPT_PATH="$HOME/Blockmesh.sh"
+LOG_FILE="$HOME/blockmesh/blockmesh.log"  # 日志文件路径
+
+# 创建日志文件并重定向输出
+exec > >(tee -a "$LOG_FILE") 2>&1
 
 # 检查是否以 root 用户运行脚本
 if [ "$(id -u)" != "0" ]; then
@@ -23,7 +27,7 @@ function main_menu() {
         echo "2. 查看日志"
         echo "3. 退出"
 
-        read -p "请输入选项 (1-2): " option
+        read -p "请输入选项 (1-3): " option
 
         case $option in
             1)
@@ -48,55 +52,6 @@ function main_menu() {
 function deploy_node() {
     echo "正在更新系统..."
     sudo apt update -y && sudo apt upgrade -y
-
-    # 安装 Docker 和 Docker Compose
-    if ! command -v docker &> /dev/null; then
-        echo "Docker 未安装，正在安装 Docker..."
-
-        # 移除可能存在的 Docker 相关包
-        for pkg in docker.io docker-doc docker-compose podman-docker containerd runc; do
-            sudo apt-get remove -y $pkg
-        done
-
-        # 安装必要的依赖
-        sudo apt-get install -y ca-certificates curl gnupg
-
-        # 添加 Docker 的 GPG 密钥
-        sudo install -m 0755 -d /etc/apt/keyrings
-        curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
-        sudo chmod a+r /etc/apt/keyrings/docker.gpg
-
-        # 添加 Docker 的 APT 源
-        echo \
-          "deb [arch="$(dpkg --print-architecture)" signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu \
-          "$(. /etc/os-release && echo "$VERSION_CODENAME")" stable" | \
-          sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
-
-        # 更新 APT 源并安装 Docker
-        sudo apt update -y && sudo apt install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin
-
-        # 检查 Docker 版本
-        echo "Docker 安装完成，版本为：$(docker --version)"
-    else
-        echo "Docker 已安装，版本为：$(docker --version)"
-    fi
-
-    # 安装 Docker Compose
-    if ! command -v docker-compose &> /dev/null; then
-        echo "Docker Compose 未安装，正在安装 Docker Compose..."
-
-        # 下载 Docker Compose 的最新版本
-        DOCKER_COMPOSE_VERSION=$(curl -s https://api.github.com/repos/docker/compose/releases/latest | grep -oP '"tag_name": "\K(.*)(?=")')
-        sudo curl -L "https://github.com/docker/compose/releases/download/${DOCKER_COMPOSE_VERSION}/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
-
-        # 赋予可执行权限
-        sudo chmod +x /usr/local/bin/docker-compose
-
-        # 检查 Docker Compose 版本
-        echo "Docker Compose 安装完成，版本为：$(docker-compose --version)"
-    else
-        echo "Docker Compose 已安装，版本为：$(docker-compose --version)"
-    fi
 
     # 创建 blockmesh 目录
     BLOCKMESH_DIR="$HOME/blockmesh"
@@ -130,23 +85,27 @@ function deploy_node() {
     read -sp "请输入您的 BlockMesh 密码: " BLOCKMESH_PASSWORD
     echo
 
-    # 创建 Docker 容器并运行 blockmesh-cli
-    echo "正在启动 Docker 容器并运行 blockmesh-cli..."
-    if ! docker run --name blockmesh-container --rm -e BLOCKMESH_EMAIL="$BLOCKMESH_EMAIL" -e BLOCKMESH_PASSWORD="$BLOCKMESH_PASSWORD" -v "$BLOCKMESH_DIR":/data ubuntu:22.04 /bin/bash -c "./blockmesh-cli"; then
-        echo "无法启动 blockmesh-cli，请检查镜像和命令。"
+    # 设置 BlockMesh 邮箱和密码的环境变量
+    export BLOCKMESH_EMAIL
+    export BLOCKMESH_PASSWORD
+
+    # 进入指定目录并运行 blockmesh-cli
+    echo "正在启动 blockmesh-cli..."
+    if ! cd /root/blockmesh/target/release && ./blockmesh-cli > "$LOG_FILE" 2>&1 &; then
+        echo "无法启动 blockmesh-cli，请检查路径和命令。"
     fi
     
     echo "脚本执行完成。"
     read -p "按任意键返回主菜单..."
 }
 
-# 查看 Docker 日志
+# 查看日志
 function view_logs() {
-    echo "正在查看 Docker 容器日志..."
-    if [ "$(docker ps -q -f name=blockmesh-container)" ]; then
-        docker logs blockmesh-container
+    if [ -f "$LOG_FILE" ]; then
+        echo "查看日志内容："
+        cat "$LOG_FILE"
     else
-        echo "没有找到名为 blockmesh-container 的运行容器。"
+        echo "日志文件不存在：$LOG_FILE"
     fi
     read -p "按任意键返回主菜单..."
 }
