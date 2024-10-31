@@ -91,7 +91,9 @@ function deploy_node() {
 
     # 进入指定目录并运行 blockmesh-cli
     echo "正在启动 blockmesh-cli..."
-    if ! cd /root/blockmesh/target/release && ./blockmesh-cli > "$LOG_FILE" 2>&1 &; then
+    if cd /root/blockmesh/target/release && ./blockmesh-cli > "$LOG_FILE" 2>&1 &; then
+        echo "blockmesh-cli 启动成功。"
+    else
         echo "无法启动 blockmesh-cli，请检查路径和命令。"
     fi
     
