@@ -104,7 +104,7 @@ function deploy_node() {
 
     # 进入指定目录并运行 blockmesh-cli
     echo "正在启动 blockmesh-cli..."
-    ./blockmesh-cli > "$LOG_FILE" 2>&1 &  # 确保使用正确的日志文件变量
+    ./blockmesh-cli --email "$BLOCKMESH_EMAIL" --password "$BLOCKMESH_PASSWORD" > "$LOG_FILE" 2>&1 &  # 确保使用正确的日志文件变量
     echo "脚本执行完成。"
 
     # 处理用户输入，确保没有错误
