@@ -90,14 +90,13 @@ function deploy_node() {
     export BLOCKMESH_EMAIL
     export BLOCKMESH_PASSWORD
 
+    # 切换目录并执行脚本
+    echo "切换目录并执行 ./blockmesh-cli..."
+    cd /root/blockmesh/target/release
+    
     # 进入指定目录并运行 blockmesh-cli
     echo "正在启动 blockmesh-cli..."
-    if cd /root/blockmesh/target/release && ./blockmesh-cli > "$LOG_FILE" 2>&1 &; then
-        echo "blockmesh-cli 启动成功。"
-    else
-        echo "无法启动 blockmesh-cli，请检查路径和命令。"
-    fi
-    
+    ./blockmesh-cli > "$LOGFILE" 2>&1 &
     echo "脚本执行完成。"
     read -p "按任意键返回主菜单..."
 }
