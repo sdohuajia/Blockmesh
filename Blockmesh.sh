@@ -78,7 +78,7 @@ function deploy_node() {
     echo "blockmesh-cli 下载并解压完成。"
 
     # 输出 blockmesh-cli 的路径
-    BLOCKMESH_CLI_PATH="$BLOCKMESH_DIR/blockmesh-cli"
+    BLOCKMESH_CLI_PATH="$BLOCKMESH_DIR/target/release/blockmesh-cli"
     echo "blockmesh-cli 路径：$BLOCKMESH_CLI_PATH"
 
     # 获取用户输入的 BlockMesh 邮箱和密码
