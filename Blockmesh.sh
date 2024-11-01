@@ -69,7 +69,7 @@ function deploy_node() {
 
     # 下载 blockmesh-cli
     echo "正在下载 blockmesh-cli..."
-    curl -L "https://github.com/block-mesh/block-mesh-monorepo/releases/download/v0.0.317/blockmesh-cli-x86_64-unknown-linux-gnu.tar.gz" -o "$BLOCKMESH_DIR/blockmesh-cli.tar.gz"
+    curl -L "https://github.com/block-mesh/block-mesh-monorepo/releases/download/v0.0.321/blockmesh-cli-x86_64-unknown-linux-gnu.tar.gz" -o "$BLOCKMESH_DIR/blockmesh-cli.tar.gz"
 
     # 解压缩并删除压缩包
     echo "正在解压缩 blockmesh-cli..."
