@@ -86,14 +86,9 @@ function deploy_node() {
     read -sp "请输入您的 BlockMesh 密码: " BLOCKMESH_PASSWORD
     echo
 
-    # 获取用户输入的端口
-    read -p "请输入要使用的端口 (默认: 1001): " PORT
-    PORT=${PORT:-1001}  # 如果未输入，则使用默认端口 1001
-
     # 设置 BlockMesh 邮箱和密码的环境变量
     export BLOCKMESH_EMAIL
     export BLOCKMESH_PASSWORD
-    export PORT  # 导出端口变量
 
     # 检查 blockmesh-cli 是否存在并具有可执行权限
     if [ ! -f "$BLOCKMESH_CLI_PATH" ]; then
