@@ -110,14 +110,15 @@ function deploy_node() {
 
 # 查看日志
 function view_logs() {
-    LOG_FILE="/root/blockmesh/blockmesh.log"  # 使用完整路径
-    if [ -f "$LOG_FILE" ]; then
-        echo "查看日志内容："
-        # 使用 Docker 查看日志的最后 100 行
-        docker logs --tail 100 blockmesh-cli-container
-    else
-        echo "日志文件不存在：$LOG_FILE"
+    # 使用 Docker 查看名为 blockmesh-cli-container 的容器的最后 100 行日志
+    echo "查看 blockmesh-cli-container 容器的日志内容："
+    docker logs --tail 100 blockmesh-cli-container
+
+    # 检查容器是否存在
+    if [ $? -ne 0 ]; then
+        echo "错误：未找到名为 blockmesh-cli-container 的容器。"
     fi
+
     read -p "按任意键返回主菜单..."
 }
 
