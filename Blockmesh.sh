@@ -115,8 +115,8 @@ function deploy_node() {
 function view_logs() {
     LOG_FILE="/root/blockmesh/blockmesh.log"  # 使用完整路径
     if [ -f "$LOG_FILE" ]; then
-        echo "查看日志内容（最后 50 行）："
-        tail -n 50 "$LOG_FILE"
+        echo "查看日志内容："
+        cat "$LOG_FILE"  # 使用 cat 命令显示日志内容
     else
         echo "日志文件不存在：$LOG_FILE"
     fi
