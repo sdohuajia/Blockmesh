@@ -113,6 +113,7 @@ function deploy_node() {
 
 # 查看日志
 function view_logs() {
+    LOG_FILE="/root/blockmesh/blockmesh.log"  # 使用完整路径
     if [ -f "$LOG_FILE" ]; then
         echo "查看日志内容（最后 50 行）："
         tail -n 50 "$LOG_FILE"
