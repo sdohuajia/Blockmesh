@@ -114,8 +114,8 @@ function deploy_node() {
 # 查看日志
 function view_logs() {
     if [ -f "$LOG_FILE" ]; then
-        echo "查看日志内容："
-        cat "$LOG_FILE"
+        echo "查看日志内容（最后 50 行）："
+        tail -n 50 "$LOG_FILE"
     else
         echo "日志文件不存在：$LOG_FILE"
     fi
