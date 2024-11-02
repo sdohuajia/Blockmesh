@@ -53,61 +53,58 @@ function deploy_node() {
     echo "正在更新系统..."
     sudo apt update -y && sudo apt upgrade -y
 
-    # 创建 blockmesh 目录
-    BLOCKMESH_DIR="$HOME/blockmesh"
-    LOG_FILE="$BLOCKMESH_DIR/blockmesh.log"
+    # 清理旧文件
+    rm -rf blockmesh-cli.tar.gz target
 
-    # 检查 blockmesh 目录是否存在
-    if [ -d "$BLOCKMESH_DIR" ]; then
-        echo "目录 $BLOCKMESH_DIR 已存在，正在删除..."
-        rm -rf "$BLOCKMESH_DIR"
+    # 如果未安装 Docker，则进行安装
+    if ! command -v docker &> /dev/null; then
+        echo "正在安装 Docker..."
+        apt-get install -y \
+            ca-certificates \
+            curl \
+            gnupg \
+            lsb-release
+        curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
+        echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+        apt-get update && apt-get install -y docker-ce docker-ce-cli containerd.io
+    else
+        echo "Docker 已安装，跳过安装步骤..."
     fi
 
-    # 创建新的 blockmesh 目录
-    mkdir -p "$BLOCKMESH_DIR"
-    echo "创建目录：$BLOCKMESH_DIR"
+    # 安装 Docker Compose
+    echo "正在安装 Docker Compose..."
+    curl -L "https://github.com/docker/compose/releases/download/1.29.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+    chmod +x /usr/local/bin/docker-compose
 
-    # 下载 blockmesh-cli
-    echo "正在下载 blockmesh-cli..."
-    curl -L "https://github.com/block-mesh/block-mesh-monorepo/releases/download/v0.0.324/blockmesh-cli-x86_64-unknown-linux-gnu.tar.gz" -o "$BLOCKMESH_DIR/blockmesh-cli.tar.gz"
+    # 创建用于解压的目标目录
+    mkdir -p target/release
 
-    # 解压缩并删除压缩包
-    echo "正在解压缩 blockmesh-cli..."
-    tar -xzf "$BLOCKMESH_DIR/blockmesh-cli.tar.gz" -C "$BLOCKMESH_DIR"
-    rm "$BLOCKMESH_DIR/blockmesh-cli.tar.gz"
-    echo "blockmesh-cli 下载并解压完成。"
+    # 下载并解压最新版 BlockMesh CLI
+    echo "下载并解压 BlockMesh CLI..."
+    curl -L https://github.com/block-mesh/block-mesh-monorepo/releases/download/v0.0.325/blockmesh-cli-x86_64-unknown-linux-gnu.tar.gz -o blockmesh-cli.tar.gz
+    tar -xzf blockmesh-cli.tar.gz --strip-components=3 -C target/release
 
-    # 输出 blockmesh-cli 的路径
-    BLOCKMESH_CLI_PATH="$BLOCKMESH_DIR/target/x86_64-unknown-linux-gnu/release/blockmesh-cli"
-    echo "blockmesh-cli 路径：$BLOCKMESH_CLI_PATH"
-
-    # 获取用户输入的 BlockMesh 邮箱和密码
-    read -p "请输入您的 BlockMesh 邮箱: " BLOCKMESH_EMAIL
-    read -sp "请输入您的 BlockMesh 密码: " BLOCKMESH_PASSWORD
-    echo
-
-    # 设置 BlockMesh 邮箱和密码的环境变量
-    export BLOCKMESH_EMAIL
-    export BLOCKMESH_PASSWORD
-
-    # 检查 blockmesh-cli 是否存在并具有可执行权限
-    if [ ! -f "$BLOCKMESH_CLI_PATH" ]; then
-        echo "错误：找不到 blockmesh-cli 文件，请检查下载和解压是否成功。"
+    # 验证解压结果
+    if [[ ! -f target/release/blockmesh-cli ]]; then
+        echo "错误：未找到 blockmesh-cli 可执行文件于 target/release。退出..."
         exit 1
     fi
 
-    chmod +x "$BLOCKMESH_CLI_PATH"  # 确保文件可执行
+    # 提示输入邮箱和密码
+    read -p "请输入您的 BlockMesh 邮箱: " email
+    read -s -p "请输入您的 BlockMesh 密码: " password
+    echo
 
-    # 切换目录并执行脚本
-    echo "切换目录并执行 ./blockmesh-cli..."
-    cd /root/blockmesh/target/x86_64-unknown-linux-gnu/release
+    # 使用 BlockMesh CLI 创建 Docker 容器
+    echo "为 BlockMesh CLI 创建 Docker 容器..."
+    docker run -it --rm \
+        --name blockmesh-cli-container \
+        -v $(pwd)/target/release:/app \
+        -e EMAIL="$email" \
+        -e PASSWORD="$password" \
+        --workdir /app \
+        ubuntu:22.04 ./blockmesh-cli --email "$email" --password "$password"
 
-    # 进入指定目录并运行 blockmesh-cli
-    echo "正在启动 blockmesh-cli..."
-    ./blockmesh-cli --email "$BLOCKMESH_EMAIL" --password "$BLOCKMESH_PASSWORD" > "$LOG_FILE" 2>&1 &  # 确保使用正确的日志文件变量
-    echo "脚本执行完成。"
-
-    # 处理用户输入，确保没有错误
     read -p "按任意键返回主菜单..."
 }
 
@@ -116,7 +113,8 @@ function view_logs() {
     LOG_FILE="/root/blockmesh/blockmesh.log"  # 使用完整路径
     if [ -f "$LOG_FILE" ]; then
         echo "查看日志内容："
-        cat "$LOG_FILE"  # 使用 cat 命令显示日志内容
+        # 使用 Docker 查看日志的最后 100 行
+        docker logs --tail 100 blockmesh-cli-container
     else
         echo "日志文件不存在：$LOG_FILE"
     fi
