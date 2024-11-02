@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # 脚本保存路径
-SCRIPT_PATH="$HOME/Blockmesh.sh"
+SCRIPT_PATH="$HOME/BlockMesh.sh"
 
 # 检查是否以 root 用户运行脚本
 if [ "$(id -u)" != "0" ]; then
