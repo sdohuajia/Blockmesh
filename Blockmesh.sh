@@ -100,7 +100,7 @@ function deploy_node() {
 
     # 切换目录并执行脚本
     echo "切换目录并执行 ./blockmesh-cli..."
-    cd /root/blockmesh/target/release
+    cd /root/blockmesh/target/x86_64-unknown-linux-gnu/release
 
     # 进入指定目录并运行 blockmesh-cli
     echo "正在启动 blockmesh-cli..."
