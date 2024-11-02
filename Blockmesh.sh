@@ -2,10 +2,6 @@
 
 # 脚本保存路径
 SCRIPT_PATH="$HOME/Blockmesh.sh"
-LOG_FILE="$HOME/blockmesh/blockmesh.log"  # 日志文件路径
-
-# 创建日志文件并重定向输出
-exec > >(tee -a "$LOG_FILE") 2>&1
 
 # 检查是否以 root 用户运行脚本
 if [ "$(id -u)" != "0" ]; then
