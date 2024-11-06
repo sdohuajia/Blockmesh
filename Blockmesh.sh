@@ -52,6 +52,14 @@ function deploy_node() {
     # 清理旧文件
     rm -rf blockmesh-cli.tar.gz target
 
+    # 检查并处理已存在的容器
+    if [ "$(docker ps -aq -f name=blockmesh-cli-container)" ]; then
+        echo "检测到 blockmesh-cli-container 容器已存在，正在停止并删除..."
+        docker stop blockmesh-cli-container
+        docker rm blockmesh-cli-container
+        echo "容器已停止并删除。"
+    fi
+
     # 如果未安装 Docker，则进行安装
     if ! command -v docker &> /dev/null; then
         echo "正在安装 Docker..."
