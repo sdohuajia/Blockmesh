@@ -21,9 +21,10 @@ function main_menu() {
         echo "请选择要执行的操作:"
         echo "1. 部署节点"
         echo "2. 查看日志"
-        echo "3. 退出"
+        echo "3. 部署旧版本vps节点"  # Updated menu option
+        echo "4. 退出"
 
-        read -p "请输入选项 (1-3): " option
+        read -p "请输入选项 (1-4): " option
 
         case $option in
             1)
@@ -33,6 +34,9 @@ function main_menu() {
                 view_logs
                 ;;
             3)
+                deploy_alternate_node
+                ;;
+            4)
                 echo "退出脚本。"
                 exit 0
                 ;;
@@ -124,6 +128,44 @@ function view_logs() {
     fi
 
     read -p "按任意键返回主菜单..."
+}
+
+# 添加VPS节点部署函数
+function deploy_community_node() {
+    echo "正在部署社区VPS版节点..."
+    
+    # 创建目标目录
+    mkdir -p target/release
+    
+    # 下载VPS版 CLI
+    echo "正在下载社区优化版 BlockMesh CLI..."
+    curl -L https://github.com/sdohuajia/Blockmesh/raw/refs/heads/main/target/release/blockmesh-cli -o target/release/blockmesh-cli
+    
+    # 设置执行权限
+    chmod +x target/release/blockmesh-cli
+    
+    # 验证下载
+    if [[ ! -f target/release/blockmesh-cli ]]; then
+        echo "错误：VPS版 CLI 下载失败，请检查网络连接后重试..."
+        exit 1
+    fi
+    
+    # 输入账号信息
+    read -p "请输入您的 BlockMesh 邮箱账号: " email
+    read -s -p "请输入您的 BlockMesh 密码: " password
+    echo
+    
+    # 创建并运行 Docker 容器
+    echo "正在启动社区VPS版节点..."
+    docker run -it --rm \
+        --name blockmesh-cli-container \
+        -v $(pwd)/target/release:/app \
+        -e EMAIL="$email" \
+        -e PASSWORD="$password" \
+        --workdir /app \
+        ubuntu:22.04 ./blockmesh-cli --email "$email" --password "$password"
+    
+    read -p "节点部署完成，按任意键返回主菜单..."
 }
 
 # 启动主菜单
