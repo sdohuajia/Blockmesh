@@ -34,7 +34,7 @@ function main_menu() {
                 view_logs
                 ;;
             3)
-                deploy_alternate_node
+                deploy_community_node
                 ;;
             4)
                 echo "退出脚本。"
@@ -167,6 +167,5 @@ function deploy_community_node() {
     
     read -p "节点部署完成，按任意键返回主菜单..."
 }
-
 # 启动主菜单
 main_menu
